@@ -26,9 +26,9 @@ floor( (random() * 1000000000))]]></ee:set-variable>
 output application/java
 var rand=random()
 ---
-if (rand > 0.8)
+if (rand > 0.7)
 round( (random() * 100000))
-else if (rand > 0.3)
+else if (rand > 0.2)
 round( (random() * 10000))
 else
 round( (random() * 1000))

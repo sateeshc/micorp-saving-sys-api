@@ -23,7 +23,6 @@ tmp/**/*
 local.properties
 .settings/
 .loadpath
-.project
 .classpath
 
 # External tool builders
@@ -33,7 +32,6 @@ local.properties
 *.launch
 
 # CDT-specific
-.cproject
 
 # PDT-specific
 .buildpath
