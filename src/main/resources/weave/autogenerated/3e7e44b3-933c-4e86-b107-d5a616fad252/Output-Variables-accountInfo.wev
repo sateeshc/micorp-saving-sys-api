@@ -1,0 +1,16 @@
+%dw 2.0
+
+type auto_3e7e44b3_933c_4e86_b107_d5a616fad252_Output_Variables_accountInfo = {|
+  id: String, 
+  label: String, 
+  number: Null, 
+  currency: String, 
+  "type": String, 
+  owners: Array<{|    user_id: String,     display_name: String  |}>, 
+  IBAN: String, 
+  overdraft: Boolean, 
+  bank_id: String, 
+  created_at: DateTime, 
+  updated_at: DateTime
+|}
+

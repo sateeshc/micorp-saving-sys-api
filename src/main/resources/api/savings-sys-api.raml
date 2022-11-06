@@ -1,0 +1,47 @@
+#%RAML 1.0
+title: Savings 
+version: v2
+baseUri: http://localhost:8081/api/
+mediaType: application/json
+protocols: [HTTP]
+
+
+
+
+/accounts/{accountId}:
+  get:
+    description: Get Details
+    displayName: Retrieve accounts
+    responses:
+      200:
+        body:
+          application/json:
+  /info:
+    get:
+      description: Retrieves information about the accounts authorized by the Customer.
+      displayName: Retrieve accounts information
+      responses:
+        200:
+          body:
+            application/json: 
+    
+                
+  /transactions:
+    get:
+      description: Retrieves transactions for the accounts authorized by the Customer.
+      displayName: Retrieve accounts transactions
+      responses:
+        200:
+          body:
+            application/json:           
+           
+  
+  /balance:
+    get:
+      description: Retrieves balances for the accounts authorized by the Customer.
+      displayName: Retrieve accounts balance
+      responses:
+        200:
+          body:
+            application/json:
+            

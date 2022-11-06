@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="account-flow" doc:id="75ee7ecb-0690-4c04-b4e2-8e3b07bdf8a1" >
+		<logger level="INFO" doc:name="Log Start" doc:id="6e2a0db4-baed-43d1-9e31-c9d455fd2c1c" />
+		<ee:transform doc:name="Account Number" doc:id="cf505618-993c-4461-bf64-79a372805c5e" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="accountNumber" ><![CDATA[
+%dw 2.0
+output application/java
+---
+floor( (random() * 1000000000))]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Account Balance" doc:id="682808e3-aaab-401a-9d20-b2f635914b83" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="beginBalance" ><![CDATA[
+%dw 2.0
+output application/java
+var rand=random()
+---
+if (rand > 0.8)
+round( (random() * 100000))
+else if (rand > 0.3)
+round( (random() * 10000))
+else
+round( (random() * 1000))
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Account Transactions Flow" doc:id="e5d6d811-aaad-41fa-9d08-0e0365c48996" name="account-details-flow"/>
+	</flow>
+	<flow name="account-info-flow" doc:id="3e7e44b3-933c-4e86-b107-d5a616fad252" >
+		<ee:transform doc:name="Account Info" doc:id="d8844d6a-2f14-4346-8a97-7cf13c5b4701" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+
+    "id": "84fdeea7-af77-4036-8697-934ee67163ee",
+    "label": "Savings account",
+    "number": vars.accountNumber,
+    "currency": "USD",
+    "type": "savings",
+    "owners": [
+      {
+        "user_id": "af990662-cd5b-4113-a21e-d829892e3be7",
+        "display_name": "Jane Thompson"
+      }
+    ],
+    "IBAN": "GB29NWBK60161331948585",
+    "overdraft": false,
+    "bank_id": "Anypoint bank",
+    "created_at": now() >> "UTC",
+    "updated_at": now() >> "UTC"
+  }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="account-balance-flow" doc:id="52639226-b45a-49c1-9b6b-105eead4f881" >
+		<ee:transform doc:name="Transform Message" doc:id="dbebea3f-6997-462d-b01a-8e9fc8b58ac5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var lastTransaction = vars.acccountTransactions[-1]
+---
+
+  {
+    "id" : uuid(),
+    "number": vars.accountNumber,
+    "balance": {
+      "amount": lastTransaction.balance,
+      "currency": "USD"
+      },
+    "available_balance": {
+      "amount": lastTransaction.balance,
+      "currency": "USD"
+      }
+  }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="account-details-flow" doc:id="3771f533-ba72-4b07-b4a3-7d5fa7f0c03b" >
+		<flow-ref doc:name="Account Info Reference" doc:id="530f306f-c7df-48be-9ace-c5fe23963a89" name="account-info-flow" target="accountInfo"/>
+		<flow-ref doc:name="Account Transactions Flow" doc:id="35c9caca-d920-4b6b-a0ef-a3a72a77aa3b" name="account-transactions-flow" target="acccountTransactions"/>
+		<flow-ref doc:name="Account Balance Reference" doc:id="662aa061-65ec-40b8-ba49-5bd24bd2dbf5" name="account-balance-flow" target="accountBalance"/>
+		<ee:transform doc:name="Account Response" doc:id="b8d8a7ec-fc19-4fc7-a300-cd5a7c0b4708" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	info: vars.accountInfo,
+	balance: vars.accountBalance,
+	pendingTransaction: vars.acccountTransactions
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="account-transactions-flow" doc:id="a792a433-00f1-4f31-bfd9-881b1b280b3d" >
+		<flow-ref doc:name="Flow Reference" doc:id="1f0b3c5b-85e9-427f-bf32-1a50d412cec8" name="banking-flow"/>
+	</flow>
+	<flow name="banking-flow" doc:id="67cdfc82-5602-4aee-8c12-e2249b4e368b" >
+		<ee:transform doc:name="Simulate Backend Wait" doc:id="38991731-df45-4ad5-bd92-806dcfadfecd" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="wait" ><![CDATA[%dw 2.0
+import * from dw::Runtime
+output application/json
+---
+{ "user" : 1 } wait round ( (random() * 1000))]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="683f7876-3742-4170-a91f-c70a64619289" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var transactions= readUrl("classpath://data/transactions.csv", "application/csv")
+---
+transactions map (trans, index) -> {
+	 transaction_id: trans.transaction_id,
+    account_no: trans.account_no,
+    transaction_date: trans.transaction_date,
+    transaction_time: trans.transaction_time,
+    amount: round(random()* 1000),
+    credit_vs_debit: trans.credit_vs_debit,
+    check_no: trans.check_no,
+    transaction_details: trans.transaction_details,
+    transaction_type: trans.transaction_type,
+    transaction_sector: trans.transaction_sector,
+    branch_id: trans.branch_id,
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="c84e361c-0400-46f5-b0d0-32ae48856f36">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Arrays
+
+output application/json
+
+var beginning_balance=vars.beginBalance
+
+var transactions=read("data/transaction.csv", "application/csv")
+
+
+
+fun calc_balance(payload) =
+   payload reduce ((item, accumulator=beginning_balance) ->  
+            if (item.credit_vs_debit == 'C') 
+                       accumulator-item.amount
+                       else 
+                       accumulator + item.amount)
+---
+payload map (trans, index) -> {
+    transaction_id: trans.transaction_id,
+    account_no: trans.account_no,
+    transaction_date: trans.transaction_date,
+    transaction_time: trans.transaction_time,
+    amount: trans.amount,
+    credit_vs_debit: trans.credit_vs_debit,
+    check_no: trans.check_no,
+    transaction_details: trans.transaction_details,
+    transaction_type: trans.transaction_type,
+    transaction_sector: trans.transaction_sector,
+    branch_id: trans.branch_id,
+    currency: "USD",
+    balance: calc_balance(slice (payload, 0, index+1))
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</flow>
+</mule>

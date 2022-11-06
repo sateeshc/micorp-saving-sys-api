@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_52639226_b45a_49c1_9b6b_105eead4f881_Output_Variables_wait = {| user: Number |}
+
